@@ -18,6 +18,8 @@ class Repository:
 
         - `bower
           <https://help.sonatype.com/repomanager3/formats/bower-repositories>`_
+        - `docker
+          <https://help.sonatype.com/repomanager3/formats/docker-registry>`_
         - `npm
           <https://help.sonatype.com/repomanager3/formats/npm-registry>`_
         - `nuget
@@ -438,9 +440,91 @@ class YumProxyRepository(ProxyRepository, YumRepository):
     """
     pass
 
+class DockerRepository(Repository):
+    """
+    A base `Docker
+    <https://help.sonatype.com/repomanager3/formats/docker-registry>`_
+    Nexus repository.
+    """
+    pass
+
+
+class DockerHostedRepository(HostedRepository, DockerRepository):
+    """
+    A base `Docker
+    <https://help.sonatype.com/repomanager3/formats/docker-registry>`_
+    Nexus repository.
+    """
+    RECIPES = ('docker',)
+
+    def __init__(self, name, http_port=None, https_port=None, **kwargs):
+        self.http_port = http_port
+        self.https_port = https_port
+
+        kwargs.update({'recipe': 'docker'})
+
+        super().__init__(name, **kwargs)
+
+    @property
+    def configuration(self):
+        """
+        As per :py:obj:`Repository.configuration` but specific to this
+        repository recipe and type.
+
+        :rtype: str
+        """
+        repo_config = super().configuration
+
+        repo_config['attributes']['docker'] = {
+            'httpPort': self.http_port,
+            'httpsPort': self.https_port
+        }
+
+        return repo_config
+
+
+class DockerProxyRepository(ProxyRepository, DockerRepository):
+    """
+    A base `Docker
+    <https://help.sonatype.com/repomanager3/formats/docker-registry>`_
+    Nexus repository.
+    """
+    RECIPES = ('docker',)
+
+    def __init__(self, name, http_port=None, https_port=None, index_type=None, **kwargs):
+        self.index_type = index_type
+        self.http_port = http_port
+        self.https_port = https_port
+
+        kwargs.update({'recipe': 'docker'})
+
+        super().__init__(name, **kwargs)
+
+    @property
+    def configuration(self):
+        """
+        As per :py:obj:`Repository.configuration` but specific to this
+        repository recipe and type.
+
+        :rtype: str
+        """
+        repo_config = super().configuration
+
+        repo_config['attributes']['docker'] = {
+            'httpPort': self.http_port,
+            'httpsPort': self.https_port
+        }
+
+        repo_config['attributes']['dockerProxy'] = {
+            'indexType': self.index_type
+        }
+
+        return repo_config
+
 
 __all__ = [
     Repository, HostedRepository, ProxyRepository,
     MavenHostedRepository, MavenProxyRepository,
     YumHostedRepository, YumProxyRepository,
+    DockerHostedRepository, DockerProxyRepository,
 ]

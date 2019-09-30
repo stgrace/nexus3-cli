@@ -97,6 +97,11 @@ def cmd_create(nexus_client, args):
     if repo_type == 'proxy':
         kwargs.update({'remote_url': args.get('<remote_url>')})
 
+    if recipe_name == 'docker':
+        kwargs.update({'http_port': args.get('<http_port>'),
+        'https_port': args.get('<https_port>'),
+        'index_type': args.get('<index_type>')})
+
     if recipe_name == 'yum':
         kwargs.update({'depth': int(args.get('--depth'))})
 
